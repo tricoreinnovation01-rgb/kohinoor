@@ -1,0 +1,6 @@
+Put your QR image file in this folder and name it:
+  qr.png
+
+Then it will be available at:
+  http://localhost:3000/qr.png
+
