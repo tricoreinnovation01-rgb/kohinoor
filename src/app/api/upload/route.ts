@@ -21,9 +21,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ url, publicId: public_id });
   } catch (e) {
     console.error(e);
+    const msg = e instanceof Error ? e.message : "Upload failed";
+    const isConfig =
+      typeof msg === "string" &&
+      (msg.includes("Cloudinary is not configured") ||
+        msg.includes("CLOUDINARY_") ||
+        msg.includes("cloud_name") ||
+        msg.includes("api_key"));
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Upload failed" },
-      { status: 500 }
+      { error: msg },
+      { status: isConfig ? 503 : 500 }
     );
   }
 }

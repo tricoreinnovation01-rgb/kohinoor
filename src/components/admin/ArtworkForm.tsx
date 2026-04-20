@@ -41,25 +41,33 @@ export function ArtworkForm({ initial }: Props) {
   const [featured, setFeatured] = useState(initial?.featured ?? false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   async function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploadError(null);
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = (await res.json()) as {
-        url?: string;
-        publicId?: string;
-        error?: string;
-      };
-      if (!res.ok) throw new Error(data.error ?? "Upload failed");
-      if (data.url) setImageUrl(data.url);
-      if (data.publicId) setPublicId(data.publicId);
+      let data: { url?: string; publicId?: string; error?: string } | null = null;
+      try {
+        data = (await res.json()) as { url?: string; publicId?: string; error?: string };
+      } catch {
+        data = null;
+      }
+      if (!res.ok) {
+        const msg =
+          data?.error ??
+          `Upload failed (HTTP ${res.status}). Check Cloudinary env vars on Vercel.`;
+        throw new Error(msg);
+      }
+      if (data?.url) setImageUrl(data.url);
+      if (data?.publicId) setPublicId(data.publicId);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Upload failed");
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -195,6 +203,9 @@ export function ArtworkForm({ initial }: Props) {
         </label>
         <input type="file" accept="image/*" onChange={onUpload} className="mt-2 block text-sm" />
         {uploading && <p className="mt-1 text-xs text-[var(--muted)]">Uploading…</p>}
+        {uploadError ? (
+          <p className="mt-2 text-xs text-red-600">{uploadError}</p>
+        ) : null}
         <input type="hidden" name="imageUrl" value={imageUrl} readOnly />
         {imageUrl && (
           <p className="mt-2 truncate text-xs text-[var(--muted)]">{imageUrl}</p>
