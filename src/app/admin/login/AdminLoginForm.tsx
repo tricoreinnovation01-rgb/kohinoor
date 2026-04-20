@@ -23,12 +23,25 @@ export function AdminLoginForm() {
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
-        setErr(data.error ?? "Login failed");
+        let message = "Login failed";
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (data?.error) message = data.error;
+        } catch {
+          try {
+            const t = (await res.text()).trim();
+            if (t) message = t.slice(0, 300);
+          } catch {
+            /* ignore */
+          }
+        }
+        setErr(message);
         return;
       }
       router.replace(from);
       router.refresh();
+    } catch {
+      setErr("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
