@@ -8,6 +8,7 @@ const links = [
   { href: "/admin", label: "Dashboard", icon: "grid" },
   { href: "/admin/artworks", label: "Artworks", icon: "image" },
   { href: "/admin/artworks/new", label: "Add artwork", icon: "plus" },
+  { href: "/admin/stats", label: "Home stats", icon: "spark" },
   { href: "/admin/about", label: "About", icon: "spark" },
   { href: "/admin/orders", label: "Orders", icon: "cart" },
   { href: "/admin/customers", label: "Customers", icon: "users" },

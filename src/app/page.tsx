@@ -3,11 +3,13 @@ import { FeaturedGrid } from "@/components/home/FeaturedGrid";
 import { StatsRow } from "@/components/home/StatsRow";
 import { ArtistIntro } from "@/components/home/ArtistIntro";
 import { getFeaturedArtworks } from "@/lib/artworks-queries";
+import { getHomeStats } from "@/lib/stats-queries";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
   const raw = await getFeaturedArtworks(12);
+  const dbStats = await getHomeStats();
   const featured = raw.map((a) => ({
     _id: String(a._id),
     slug: a.slug,
@@ -31,7 +33,14 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection featured={heroFeatured} />
-      <StatsRow />
+      <StatsRow
+        stats={[
+          { value: dbStats?.works ?? 240, label: "Works", suffix: "+" },
+          { value: dbStats?.exhibitions ?? 18, label: "Exhibitions" },
+          { value: dbStats?.awards ?? 12, label: "Awards" },
+          { value: dbStats?.experienceYears ?? 8, label: "Experience", suffix: " yrs" },
+        ]}
+      />
       <FeaturedGrid items={featured} />
       <ArtistIntro />
     </>
