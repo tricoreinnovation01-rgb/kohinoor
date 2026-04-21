@@ -54,7 +54,11 @@ export function AdminLoginForm() {
         <p className="mt-2 text-sm text-[var(--muted)]">
           JWT session — use credentials from seed.
         </p>
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+        <form
+          onSubmit={onSubmit}
+          className="mt-8 space-y-4"
+          aria-busy={loading}
+        >
           <div>
             <label className="text-xs uppercase tracking-widest text-[var(--muted)]">
               Email
@@ -64,6 +68,7 @@ export function AdminLoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
               className="mt-2 w-full rounded-xl border border-[var(--border)] bg-transparent px-4 py-3 text-sm"
             />
           </div>
@@ -76,10 +81,16 @@ export function AdminLoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
               className="mt-2 w-full rounded-xl border border-[var(--border)] bg-transparent px-4 py-3 text-sm"
             />
           </div>
           {err && <p className="text-sm text-red-600">{err}</p>}
+          {loading ? (
+            <p className="text-sm text-[var(--muted)]">
+              Signing in… please wait.
+            </p>
+          ) : null}
           <button
             type="submit"
             disabled={loading}

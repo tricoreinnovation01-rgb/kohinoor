@@ -12,10 +12,11 @@ export default async function AdminHomeIntroPage() {
     await connectDB();
     const doc = await HomeArtistIntro.findOne({ key: "home-artist-intro" })
       .select(
-        "imageUrl imageAlt name roleLine eyebrow headline headlineEmphasis body quote signature"
+        "imageUrl imagePublicId imageAlt name roleLine eyebrow headline headlineEmphasis body quote signature"
       )
       .lean<{
         imageUrl?: string;
+        imagePublicId?: string;
         imageAlt?: string;
         name?: string;
         roleLine?: string;
@@ -29,6 +30,7 @@ export default async function AdminHomeIntroPage() {
     initial = doc
       ? {
           imageUrl: String(doc.imageUrl ?? ""),
+          imagePublicId: String(doc.imagePublicId ?? ""),
           imageAlt: String(doc.imageAlt ?? ""),
           name: String(doc.name ?? ""),
           roleLine: String(doc.roleLine ?? ""),

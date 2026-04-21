@@ -37,6 +37,7 @@ export default async function HomePage() {
     imageUrl:
       dbIntro?.imageUrl ??
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80",
+    imagePublicId: dbIntro?.imagePublicId ?? "",
     imageAlt: dbIntro?.imageAlt ?? "Kohinoor in the studio",
     name: dbIntro?.name ?? "Kohinoor",
     roleLine: dbIntro?.roleLine ?? "Drawing artist & architectural designer",

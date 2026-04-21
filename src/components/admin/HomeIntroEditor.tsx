@@ -6,6 +6,7 @@ import type { HomeArtistIntroContent } from "@/types/home-intro";
 
 const DEFAULTS: HomeArtistIntroContent = {
   imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80",
+  imagePublicId: "",
   imageAlt: "Kohinoor in the studio",
   name: "Kohinoor",
   roleLine: "Drawing artist & architectural designer",
@@ -32,6 +33,7 @@ export function HomeIntroEditor({
     const src: Partial<HomeArtistIntroContent> = initial ?? {};
     return {
       imageUrl: src.imageUrl ?? DEFAULTS.imageUrl,
+      imagePublicId: src.imagePublicId ?? DEFAULTS.imagePublicId,
       imageAlt: src.imageAlt ?? DEFAULTS.imageAlt,
       name: src.name ?? DEFAULTS.name,
       roleLine: src.roleLine ?? DEFAULTS.roleLine,
@@ -47,6 +49,54 @@ export function HomeIntroEditor({
   const [state, setState] = useState<HomeArtistIntroContent>(initialState);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const MAX_IMAGE_MB = 5;
+  const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+
+  async function onUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    if (file.size > MAX_IMAGE_BYTES) {
+      setUploadError(
+        `Image is too large. Max ${MAX_IMAGE_MB}MB. Please upload a smaller file.`
+      );
+      e.target.value = "";
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      let data: { url?: string; publicId?: string; error?: string } | null = null;
+      try {
+        data = (await res.json()) as { url?: string; publicId?: string; error?: string };
+      } catch {
+        data = null;
+      }
+      if (!res.ok) {
+        throw new Error(
+          data?.error ??
+            `Upload failed (HTTP ${res.status}). Check Cloudinary env vars on Vercel.`
+        );
+      }
+      if (data?.url) {
+        setState((s) => ({
+          ...s,
+          imageUrl: data?.url ?? s.imageUrl,
+          imagePublicId: data?.publicId,
+        }));
+      }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
 
   async function save() {
     setBusy(true);
@@ -88,13 +138,37 @@ export function HomeIntroEditor({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="text-xs uppercase tracking-widest text-[var(--muted)]">
-            Image URL
+            Image
           </label>
+          <p className="mt-2 text-xs text-[var(--muted)]">
+            Max {MAX_IMAGE_MB}MB. Recommended: 1200×1600 (3:4 portrait).
+          </p>
           <input
-            value={state.imageUrl}
-            onChange={(e) => setState((s) => ({ ...s, imageUrl: e.target.value }))}
-            className={inputCls()}
+            type="file"
+            accept="image/*"
+            onChange={onUpload}
+            className="mt-2 block text-sm"
           />
+          {uploading ? (
+            <p className="mt-1 text-xs text-[var(--muted)]">Uploading…</p>
+          ) : null}
+          {uploadError ? (
+            <p className="mt-2 text-xs text-red-600">{uploadError}</p>
+          ) : null}
+          <div className="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-card)]">
+            <div className="relative aspect-[3/4] w-full">
+              {/* plain img for preview; URL is from Cloudinary */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={state.imageUrl}
+                alt={state.imageAlt}
+                className="h-full w-full object-cover grayscale"
+              />
+            </div>
+          </div>
+          <p className="mt-2 truncate text-xs text-[var(--muted)]">
+            {state.imageUrl}
+          </p>
         </div>
         <div>
           <label className="text-xs uppercase tracking-widest text-[var(--muted)]">

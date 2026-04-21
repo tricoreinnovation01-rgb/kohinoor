@@ -6,6 +6,7 @@ import { getAuthFromCookies } from "@/lib/auth";
 
 const updateSchema = z.object({
   imageUrl: z.string().url().optional().or(z.literal("")),
+  imagePublicId: z.string().max(200).optional(),
   imageAlt: z.string().max(120).optional(),
   name: z.string().max(80).optional(),
   roleLine: z.string().max(120).optional(),

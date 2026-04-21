@@ -6,6 +6,9 @@ import type { AboutContent, AboutTimelineItem } from "@/types/about";
 
 type AboutState = AboutContent;
 
+const MAX_IMAGE_MB = 5;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
+
 const DEFAULTS: AboutState = {
   heroTitle: "A life in lines",
   heroItalicWord: "lines",
@@ -83,6 +86,46 @@ export function AboutEditor({ initial }: { initial: Partial<AboutState> | null }
   const [state, setState] = useState<AboutState>(initialState);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [portraitUploading, setPortraitUploading] = useState(false);
+  const [portraitUploadError, setPortraitUploadError] = useState<string | null>(null);
+  const [silenceUploading, setSilenceUploading] = useState(false);
+  const [silenceUploadError, setSilenceUploadError] = useState<string | null>(null);
+
+  async function uploadImage(
+    file: File,
+    setUploading: (v: boolean) => void,
+    setError: (v: string | null) => void,
+    onOk: (url: string) => void
+  ) {
+    setError(null);
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError(`Image is too large. Max ${MAX_IMAGE_MB}MB. Please upload a smaller file.`);
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      let data: { url?: string; error?: string } | null = null;
+      try {
+        data = (await res.json()) as { url?: string; error?: string };
+      } catch {
+        data = null;
+      }
+      if (!res.ok || !data?.url) {
+        throw new Error(
+          data?.error ??
+            `Upload failed (HTTP ${res.status}). Check Cloudinary env vars on Vercel.`
+        );
+      }
+      onOk(data.url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function save() {
     setBusy(true);
@@ -171,11 +214,48 @@ export function AboutEditor({ initial }: { initial: Partial<AboutState> | null }
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <label className="label-caps text-[var(--muted)]">Portrait image URL</label>
+              <p className="mt-2 text-xs text-[var(--muted)]">
+                Max {MAX_IMAGE_MB}MB. Recommended: 1200×1600 (3:4 portrait).
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  void uploadImage(
+                    f,
+                    setPortraitUploading,
+                    setPortraitUploadError,
+                    (url) => set("portraitImageUrl", url)
+                  );
+                  e.target.value = "";
+                }}
+                className="mt-2 block text-sm"
+              />
+              {portraitUploading ? (
+                <p className="mt-1 text-xs text-[var(--muted)]">Uploading…</p>
+              ) : null}
+              {portraitUploadError ? (
+                <p className="mt-2 text-xs text-red-600">{portraitUploadError}</p>
+              ) : null}
               <input
                 className={inputCls()}
                 value={state.portraitImageUrl}
                 onChange={(e) => set("portraitImageUrl", e.target.value)}
               />
+              {state.portraitImageUrl ? (
+                <div className="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-card)]">
+                  <div className="relative aspect-[3/4] w-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={state.portraitImageUrl}
+                      alt="Portrait preview"
+                      className="h-full w-full object-cover grayscale"
+                    />
+                  </div>
+                </div>
+              ) : null}
             </div>
             <div>
               <label className="label-caps text-[var(--muted)]">Quote label</label>
@@ -210,11 +290,48 @@ export function AboutEditor({ initial }: { initial: Partial<AboutState> | null }
           </div>
           <div>
             <label className="label-caps text-[var(--muted)]">Image URL</label>
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Max {MAX_IMAGE_MB}MB. Recommended: 1600×1000 (landscape).
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                void uploadImage(
+                  f,
+                  setSilenceUploading,
+                  setSilenceUploadError,
+                  (url) => set("silenceImageUrl", url)
+                );
+                e.target.value = "";
+              }}
+              className="mt-2 block text-sm"
+            />
+            {silenceUploading ? (
+              <p className="mt-1 text-xs text-[var(--muted)]">Uploading…</p>
+            ) : null}
+            {silenceUploadError ? (
+              <p className="mt-2 text-xs text-red-600">{silenceUploadError}</p>
+            ) : null}
             <input
               className={inputCls()}
               value={state.silenceImageUrl}
               onChange={(e) => set("silenceImageUrl", e.target.value)}
             />
+            {state.silenceImageUrl ? (
+              <div className="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-card)]">
+                <div className="relative aspect-[5/3] w-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={state.silenceImageUrl}
+                    alt="Silence image preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
           <div className="md:col-span-2">
             <label className="label-caps text-[var(--muted)]">Text</label>

@@ -1,5 +1,6 @@
 export type HomeArtistIntroContent = {
   imageUrl: string;
+  imagePublicId?: string;
   imageAlt: string;
   name: string;
   roleLine: string;
