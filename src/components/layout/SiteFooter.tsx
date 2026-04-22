@@ -60,7 +60,7 @@ export function SiteFooter() {
         <NewsletterSignup />
       </div>
       <div className="container-narrow mt-14 border-t border-[var(--border)] pt-8 text-center text-[10px] font-light tracking-[0.12em] text-[var(--muted)]">
-        © {new Date().getFullYear()} Kohinoor Artist. All rights reserved.
+        © {new Date().getFullYear()} Kohinoor Artist · Tricore innovations. All rights reserved.
       </div>
     </footer>
   );
