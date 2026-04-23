@@ -15,6 +15,8 @@ export type FeaturedItem = {
   tags?: string[];
 };
 
+const ASPECTS = ["aspect-[3/4]", "aspect-square", "aspect-[5/4]"] as const;
+
 export function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
   if (!items.length) return null;
 
@@ -34,8 +36,9 @@ export function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
           View all works
         </Link>
       </div>
-      <div className="container-narrow grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-        {items.slice(0, 6).map((it, i) => (
+      <div className="container-narrow">
+        <div className="columns-2 gap-4 sm:gap-6 lg:columns-3">
+          {items.slice(0, 9).map((it, i) => (
           <motion.article
             key={it._id}
             initial={{ opacity: 0, y: 24 }}
@@ -46,19 +49,19 @@ export function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
               delay: i * 0.06,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className="group"
+            className="group mb-4 break-inside-avoid sm:mb-6"
           >
             <div className="relative overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition duration-500 ease-out group-hover:-translate-y-1">
               <Link
                 href={`/work/${it.slug}`}
-                className="relative block aspect-square"
+                className={`relative block ${ASPECTS[i % ASPECTS.length]}`}
               >
                 <Image
                   src={it.imageUrl}
                   alt={it.title}
                   fill
                   className="object-cover transition duration-[650ms] ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-[1.03]"
-                  sizes="(max-width:1024px) 50vw, 33vw"
+                  sizes="(max-width:640px) 92vw, (max-width:1024px) 46vw, 30vw"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-[#0d0d0d]/0 transition duration-500 group-hover:bg-[#0d0d0d]/45" />
@@ -88,7 +91,8 @@ export function FeaturedGrid({ items }: { items: FeaturedItem[] }) {
               </div>
             </div>
           </motion.article>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

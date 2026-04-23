@@ -138,14 +138,14 @@ export function PortfolioClient({
           initial="hidden"
           animate="show"
           key={filterKey + items.length}
-          className="columns-1 gap-6 sm:columns-2 lg:columns-3"
+          className="columns-2 gap-4 sm:gap-6 lg:columns-3"
         >
           {items.map((a, i) => (
             <motion.div
               key={a._id}
               variants={itemVariants}
               transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-              className="mb-6 break-inside-avoid"
+              className="mb-4 break-inside-avoid sm:mb-6"
             >
               <ArtworkCard
                 title={a.title}

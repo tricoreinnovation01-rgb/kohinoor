@@ -183,7 +183,7 @@ export function WorkDetailClient({
             ].map(([k, v]) => (
               <div
                 key={k}
-                className="grid grid-cols-[1fr_1.4fr] gap-4 border-b border-[var(--border)] px-4 py-3 text-sm last:border-b-0"
+                className="grid gap-2 border-b border-[var(--border)] px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[1fr_1.4fr] sm:gap-4"
               >
                 <span className="label-caps text-[var(--muted)]">{k}</span>
                 <span className="font-light text-[var(--secondary)]">{v}</span>

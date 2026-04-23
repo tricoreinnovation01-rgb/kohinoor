@@ -27,10 +27,10 @@ export function SiteHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--border)] bg-[color-mix(in_oklab,var(--background)_92%,transparent)] backdrop-blur-md">
-      <div className="container-narrow grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 md:h-[4.5rem]">
+      <div className="container-narrow flex h-16 items-center justify-between gap-3 md:h-[4.5rem] md:grid md:grid-cols-[1fr_auto_1fr] md:gap-4">
         <Link
           href="/"
-          className="justify-self-start leading-tight text-[var(--foreground)]"
+          className="min-w-0 justify-self-start leading-tight text-[var(--foreground)]"
         >
           <span className="font-display text-lg font-light tracking-tight md:text-xl">
             Kohinoor
@@ -40,7 +40,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center justify-center gap-1 lg:flex">
+        <nav className="hidden items-center justify-center gap-1 md:justify-self-center lg:flex">
           {nav.map((n) => {
             const active =
               n.href === "/"
@@ -62,7 +62,7 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 md:justify-self-end">
           <Link
             href="/shop"
             className="relative inline-flex items-center justify-center border border-[var(--border)] bg-[var(--surface-card)] px-3 py-2 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--foreground)] transition hover:border-[var(--gold)]"
